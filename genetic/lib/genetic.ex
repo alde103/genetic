@@ -2,28 +2,25 @@ defmodule Genetic do
   alias Types.Chromosome
 
   def run(problem, opts \\ []) do
-    initialize(&problem.genotype/0)
-    |> evolve(problem, 0, 0, 0, opts)
+    initialize(&problem.genotype/0, opts)
+    |> evolve(problem, 0, opts)
   end
 
-  def evolve(population, problem, generation, last_max_fitness, temperature, opts \\ []) do
-    cooling_rate = Keyword.get(opts, :cooling_rate, 0.2)
+  def evolve(population, problem, generation, opts \\ []) do
     population = evaluate(population, &problem.fitness_function/1, opts)
 
     best = hd(population)
-    # best = Enum.max_by(population, &problem.fitness_function/1)
-    best_fitness = best.fitness
-    temperature = (1 - cooling_rate) * (temperature + (best_fitness - last_max_fitness))
-    IO.puts("\rCurrent Best: #{inspect({best.fitness, best.genes, temperature})}")
 
-    if problem.terminate?(population, generation, temperature) do
+    IO.puts("\rCurrent Best: #{inspect({best.fitness, best.genes})}")
+
+    if problem.terminate?(population, generation) do
       best
     else
       population
       |> select(opts)
       |> crossover(opts)
       |> mutation(opts)
-      |> evolve(problem, generation + 1, best_fitness, temperature, opts)
+      |> evolve(problem, generation + 1, opts)
     end
   end
 
