@@ -64,14 +64,20 @@ defmodule Genetic do
     {parents, MapSet.to_list(leftover)}
   end
 
+  def crossover(population, opts \\ []) do
+    crossover_fn = Keyword.get(opts, :crossover_type, &Toolbox.Crossover.single_point/3)
+    crossover_rate = Keyword.get(opts, :crossover_rate, 0.5)
+    chromosome_repair = Keyword.get(opts, :chromosome_repair, false)
 
-  def crossover(population, _opts \\ []) do
-    Enum.reduce(population, [], fn {p1, p2}, acc ->
-      cx_point = :rand.uniform(length(p1.genes))
-      {{h1, t1}, {h2, t2}} = {Enum.split(p1.genes, cx_point), Enum.split(p2.genes, cx_point)}
-      {c1, c2} = {%Chromosome{p1 | genes: h1 ++ t2}, %Chromosome{p2 | genes: h2 ++ t1}}
-      [c1, c2 | acc]
-    end)
+    new_generation =
+      Enum.reduce(population, [], fn {p1, p2}, acc ->
+        {c1, c2} = apply(crossover_fn, [p1, p2, crossover_rate])
+        [c1, c2 | acc]
+      end)
+
+    if chromosome_repair,
+      do: Enum.map(new_generation, &repair_chromosome(&1)),
+      else: new_generation
   end
 
   def mutation(population, opts \\ []) do
@@ -85,5 +91,22 @@ defmodule Genetic do
         chromosome
       end
     end)
+  end
+
+  defp repair_chromosome(chromosomes) do
+    new_genes =
+      chromosomes.genes
+      |> MapSet.new()
+      |> repair_helper(chromosomes.size)
+    %Chromosome{chromosomes | genes: new_genes}
+  end
+
+  defp repair_helper(chromosome, k) do
+    if MapSet.size(chromosome) >= k do
+      MapSet.to_list(chromosome)
+    else
+      num = :rand.uniform(8) - 1
+      repair_helper(MapSet.put(chromosome, num), k)
+    end
   end
 end
