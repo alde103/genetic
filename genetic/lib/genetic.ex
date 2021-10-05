@@ -11,14 +11,20 @@ defmodule Genetic do
 
     best = hd(population)
 
-    IO.puts("\rCurrent Best: #{inspect({best.fitness, best.genes})}")
+    IO.puts("\rCurrent Best: #{inspect({best.fitness, best.genes, best.age})}")
 
     if problem.terminate?(population, generation) do
       best
     else
       {parents, leftover} = select(population, opts)
       children = crossover(parents, opts)
-      children ++ leftover
+      extra_children = (Enum.count(children) + Enum.count(leftover) - Enum.count(population))
+      cond do
+        extra_children >= 0 ->
+          children ++ Enum.drop(leftover, extra_children)
+        true ->
+          children ++ leftover ++ Enum.take(children, abs(extra_children))
+      end
       |> mutation(opts)
       |> evolve(problem, generation + 1, opts)
     end
@@ -40,16 +46,18 @@ defmodule Genetic do
   end
 
   def select(population, opts \\ []) do
-    select_fn = Keyword.get(opts, :selection_type, &Toolbox.Selection.elite/2)
+    select_fn = Keyword.get(opts, :selection_type, &Toolbox.Selection.elite/3)
 
     select_rate = Keyword.get(opts, :selection_rate, 0.8)
+
+    tournsize = Keyword.get(opts, :selection_tournsize, 4)
 
     n = round(length(population) * select_rate)
     n = if rem(n, 2) == 0, do: n, else: n + 1
 
     parents =
       select_fn
-      |> apply([population, n])
+      |> apply([population, n, tournsize])
 
     leftover =
       population
@@ -88,8 +96,8 @@ defmodule Genetic do
     population
     |> Enum.map(fn chromosome ->
       if :rand.uniform() < mutation_rate do
-        apply(mutation_fn, [chromosome, mutation_args])
-        %Chromosome{chromosome | genes: Enum.shuffle(chromosome.genes)}
+        new_chromosome = apply(mutation_fn, [chromosome, mutation_args])
+        %Chromosome{chromosome | genes: new_chromosome.genes}
       else
         chromosome
       end
