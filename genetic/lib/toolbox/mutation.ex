@@ -6,15 +6,14 @@ defmodule Toolbox.Mutation do
   def flip(chromosome, probability) do
     new_genes =
       chromosome.genes
-      |> Enum.map(
-        fn g ->
-          if :rand.uniform() < probability do
-            g ^^^ 1
-          else
-            g
-          end
+      |> Enum.map(fn g ->
+        if :rand.uniform() < probability do
+          g ^^^ 1
+        else
+          g
         end
-      )
+      end)
+
     %Chromosome{chromosome | genes: new_genes, size: chromosome.size}
   end
 
@@ -23,11 +22,13 @@ defmodule Toolbox.Mutation do
     new_genes =
       chromosome.genes
       |> Enum.shuffle()
+
     %Chromosome{chromosome | genes: new_genes, size: chromosome.size}
   end
 
   def scramble_by_slice(chromosome, n) do
     start = :rand.uniform(n - 1)
+
     {lo, hi} =
       if start + n >= chromosome.size do
         {start - n, start}
@@ -51,10 +52,9 @@ defmodule Toolbox.Mutation do
       |> Enum.sum()
       |> Kernel./(chromosome.size)
 
-
     new_genes =
       chromosome.genes
-      |> Enum.map( fn _ ->
+      |> Enum.map(fn _ ->
         :rand.normal(mu, sigma)
       end)
 

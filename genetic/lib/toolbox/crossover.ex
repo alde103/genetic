@@ -39,6 +39,7 @@ defmodule Toolbox.Crossover do
         end
       end)
       |> Enum.unzip()
+
     {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
   end
 
@@ -54,14 +55,12 @@ defmodule Toolbox.Crossover do
     {c1, c2} =
       p1.genes
       |> Enum.zip(p2.genes)
-      |> Enum.map(
-        fn {x, y} ->
-          {
-            x*rate + y*(1-rate),
-            y*rate + x*(1-rate)
-          }
-        end
-      )
+      |> Enum.map(fn {x, y} ->
+        {
+          x * rate + y * (1 - rate),
+          y * rate + x * (1 - rate)
+        }
+      end)
       |> Enum.unzip()
 
     {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
@@ -69,20 +68,18 @@ defmodule Toolbox.Crossover do
 
   def random_rate_whole_arithmetic_crossover(p1, p2, _rate) do
     random_rate = :rand.uniform()
+
     {c1, c2} =
       p1.genes
       |> Enum.zip(p2.genes)
-      |> Enum.map(
-        fn {x, y} ->
-          {
-            x*random_rate + y*(1-random_rate),
-            y*random_rate + x*(1-random_rate)
-          }
-        end
-      )
+      |> Enum.map(fn {x, y} ->
+        {
+          x * random_rate + y * (1 - random_rate),
+          y * random_rate + x * (1 - random_rate)
+        }
+      end)
       |> Enum.unzip()
 
     {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
   end
-
 end

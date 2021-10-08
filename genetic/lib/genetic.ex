@@ -11,22 +11,19 @@ defmodule Genetic do
 
     best = hd(population)
 
-    IO.puts("\rCurrent Best: #{inspect({best.fitness, best.genes, best.age})}")
+    IO.puts(
+      "\rCurrent Best: #{inspect({best.fitness, best.genes, best.age, length(population)})}"
+    )
 
     if problem.terminate?(population, generation) do
       best
     else
-      {parents, leftover} = select(population, opts)
-      children = crossover(parents, opts)
-      extra_children = (Enum.count(children) + Enum.count(leftover) - Enum.count(population))
-      cond do
-        extra_children >= 0 ->
-          children ++ Enum.drop(leftover, extra_children)
-        true ->
-          children ++ leftover ++ Enum.take(children, abs(extra_children))
-      end
-      |> mutation(opts)
-      |> evolve(problem, generation + 1, opts)
+      {paired_parents, parents, leftover} = select(population, opts)
+      children = crossover(paired_parents, opts)
+      mutants = mutation(population, opts)
+      offspring = Enum.drop(children, Enum.count(mutants)) ++ mutants
+      new_population = reinsertion(parents, offspring, leftover, opts)
+      evolve(new_population, problem, generation + 1, opts)
     end
   end
 
@@ -59,17 +56,14 @@ defmodule Genetic do
       select_fn
       |> apply([population, n, tournsize])
 
-    leftover =
-      population
-      |> MapSet.new()
-      |> MapSet.difference(MapSet.new(parents))
+    leftover = Enum.reduce(parents, population, fn parent, acc -> acc -- [parent] end)
 
-    parents =
+    paired_parents =
       parents
       |> Enum.chunk_every(2)
       |> Enum.map(&List.to_tuple(&1))
 
-    {parents, MapSet.to_list(leftover)}
+    {paired_parents, parents, leftover}
   end
 
   def crossover(population, opts \\ []) do
@@ -93,15 +87,20 @@ defmodule Genetic do
     mutation_rate = Keyword.get(opts, :mutation_rate, 0.05)
     mutation_args = Keyword.get(opts, :mutation_args, 0.05)
 
+    n = floor(length(population) * mutation_rate)
+
     population
+    |> Enum.take_random(n)
     |> Enum.map(fn chromosome ->
-      if :rand.uniform() < mutation_rate do
-        new_chromosome = apply(mutation_fn, [chromosome, mutation_args])
-        %Chromosome{chromosome | genes: new_chromosome.genes}
-      else
-        chromosome
-      end
+      new_chromosome = apply(mutation_fn, [chromosome, mutation_args])
+      %Chromosome{chromosome | genes: new_chromosome.genes}
     end)
+  end
+
+  def reinsertion(parents, offspring, leftover, opts \\ []) do
+    strategy = Keyword.get(opts, :reinsertion_strategy, &Toolbox.Reinsertion.pure/4)
+    survival_rate = Keyword.get(opts, :survival_rate, 0.2)
+    apply(strategy, [parents, offspring, leftover, survival_rate])
   end
 
   defp repair_chromosome(chromosomes) do
@@ -109,6 +108,7 @@ defmodule Genetic do
       chromosomes.genes
       |> MapSet.new()
       |> repair_helper(chromosomes.size)
+
     %Chromosome{chromosomes | genes: new_genes}
   end
 

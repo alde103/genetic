@@ -9,7 +9,7 @@ defmodule Toolbox.Selection do
     |> Enum.take_random(n)
   end
 
-  #with duplicates.
+  # with duplicates.
   def tournament(population, n, tournsize) do
     0..(n - 1)
     |> Enum.map(fn _ ->
@@ -32,6 +32,7 @@ defmodule Toolbox.Selection do
         population
         |> Enum.take_random(tournsize)
         |> Enum.max_by(fn chromosome -> chromosome.fitness end)
+
       tournament_helper(population, n, tournsize, MapSet.put(selected, chosen))
     end
   end
@@ -39,14 +40,16 @@ defmodule Toolbox.Selection do
   def roulette(chromosomes, n, _tournsize) do
     sum_fitness =
       chromosomes
-      |> Enum.map(&(&1.fitness))
+      |> Enum.map(& &1.fitness)
       |> Enum.sum()
 
     0..(n - 1)
     |> Enum.map(fn _n ->
       u = :rand.uniform() * sum_fitness
+
       chromosomes
-      |> Enum.reduce_while(0,
+      |> Enum.reduce_while(
+        0,
         fn x, sum ->
           if x.fitness + sum > u do
             {:halt, x}
