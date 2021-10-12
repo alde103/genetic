@@ -1,3 +1,10 @@
 %{
+  "alex": {:hex, :alex, "0.3.2", "b6fa1d744783707e1ff068ecdef2eb993f9b05a2ebe9c97ba67b05902c0aaa9c", [:mix], [], "hexpm", "9d40610d06857f5a321923f28c44ca08575ad64594cbbfa4352eb115e5c0566e"},
+  "earmark_parser": {:hex, :earmark_parser, "1.4.16", "607709303e1d4e3e02f1444df0c821529af1c03b8578dfc81bb9cf64553d02b9", [:mix], [], "hexpm", "69fcf696168f5a274dd012e3e305027010658b2d1630cef68421d6baaeaccead"},
+  "ex_doc": {:hex, :ex_doc, "0.23.0", "a069bc9b0bf8efe323ecde8c0d62afc13d308b1fa3d228b65bca5cf8703a529d", [:mix], [{:earmark_parser, "~> 1.4.0", [hex: :earmark_parser, repo: "hexpm", optional: false]}, {:makeup_elixir, "~> 0.14", [hex: :makeup_elixir, repo: "hexpm", optional: false]}], "hexpm", "f5e2c4702468b2fd11b10d39416ddadd2fcdd173ba2a0285ebd92c39827a5a16"},
+  "gnuplot": {:hex, :gnuplot, "1.20.320", "7e8930911bd48615a43925e01b2822312b8735a56689dd373b2775341014d966", [:mix], [{:ex_doc, "~> 0.23.0", [hex: :ex_doc, repo: "hexpm", optional: false]}], "hexpm", "0996291ec1395552d774f57d6bc986cb60a08032546bc4c13c3e15ab0c1d0215"},
   "libgraph": {:hex, :libgraph, "0.13.3", "20732b7bafb933dcf7351c479e03076ebd14a85fd3202c67a1c197f4f7c2466b", [:mix], [], "hexpm", "78f2576eef615440b46f10060b1de1c86640441422832052686df53dc3c148c6"},
+  "makeup": {:hex, :makeup, "1.0.5", "d5a830bc42c9800ce07dd97fa94669dfb93d3bf5fcf6ea7a0c67b2e0e4a7f26c", [:mix], [{:nimble_parsec, "~> 0.5 or ~> 1.0", [hex: :nimble_parsec, repo: "hexpm", optional: false]}], "hexpm", "cfa158c02d3f5c0c665d0af11512fed3fba0144cf1aadee0f2ce17747fba2ca9"},
+  "makeup_elixir": {:hex, :makeup_elixir, "0.15.1", "b5888c880d17d1cc3e598f05cdb5b5a91b7b17ac4eaf5f297cb697663a1094dd", [:mix], [{:makeup, "~> 1.0", [hex: :makeup, repo: "hexpm", optional: false]}, {:nimble_parsec, "~> 1.1", [hex: :nimble_parsec, repo: "hexpm", optional: false]}], "hexpm", "db68c173234b07ab2a07f645a5acdc117b9f99d69ebf521821d89690ae6c6ec8"},
+  "nimble_parsec": {:hex, :nimble_parsec, "1.1.0", "3a6fca1550363552e54c216debb6a9e95bd8d32348938e13de5eda962c0d7f89", [:mix], [], "hexpm", "08eb32d66b706e913ff748f11694b17981c0b04a33ef470e33e11b3d3ac8f54b"},
 }

@@ -45,43 +45,37 @@ defmodule TigerSimulation do
   end
 end
 
-soln = Genetic.run(TigerSimulation,
-          population_size: 100,
-          selection_rate: 0.9,
-          mutation_rate: 0.1)
+import Gnuplot
 
-IO.inspect(soln)
+tiger = Genetic.run(TigerSimulation,
+                    population_size: 2,
+                    selection_rate: 1.0,
+                    mutation_rate: 0.0)
 
-{_, third_gen_stats} = Utilities.Statistics.lookup(3)
 
-IO.puts("Min fitness after 3rd Generation: #{third_gen_stats.min_fitness}")
-
-{_, zero_gen_stats} = Utilities.Statistics.lookup(0)
-{_, fivehundred_gen_stats} = Utilities.Statistics.lookup(500)
-{_, onethousand_gen_stats} = Utilities.Statistics.lookup(1000)
-
-IO.puts("""
-0th: #{zero_gen_stats.mean_fitness}
-500th: #{fivehundred_gen_stats.mean_fitness}
-1000th: #{onethousand_gen_stats.mean_fitness}
-""")
-
-soln = Genetic.run(TigerSimulation,
-          population_size: 20,
-          selection_rate: 0.9,
-          mutation_rate: 0.1,
-          statistics: %{average_tiger: &TigerSimulation.average_tiger/1})
-
-IO.inspect(soln)
-
-{_, zero_gen_stats} = Utilities.Statistics.lookup(0)
-{_, fivehundred_gen_stats} = Utilities.Statistics.lookup(500)
-{_, onethousand_gen_stats} = Utilities.Statistics.lookup(1000)
-
-IO.inspect(zero_gen_stats.average_tiger, label: "0th")
-IO.inspect(fivehundred_gen_stats.average_tiger, label: "500th")
-IO.inspect(onethousand_gen_stats.average_tiger, label: "1000th")
+IO.write("\n")
 
 genealogy = Utilities.Genealogy.get_tree()
 
-IO.inspect(Graph.vertices(genealogy))
+{:ok, dot} = Graph.Serializers.DOT.serialize(genealogy)
+{:ok, dotfile} = File.open("tiger_simulation.dot", [:write])
+:ok = IO.binwrite(dotfile, dot)
+:ok = File.close(dotfile)
+
+tiger = Genetic.run(TigerSimulation,
+                    population_size: 50,
+                    selection_rate: 0.8,
+                    mutation_rate: 0.1)
+
+stats =
+  :ets.tab2list(:statistics)
+  |> Enum.map(fn {gen, stats} -> [gen, stats.mean_fitness] end)
+  |> Enum.sort_by(&(&1), :asc)
+
+{:ok, cmd} =
+  plot([
+    [:set, :title, "mean fitness versus generation"],
+    [:plot, "-", :with, :points]
+    ], [stats])
+
+IO.inspect(cmd)
