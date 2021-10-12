@@ -9,10 +9,16 @@ defmodule Genetic do
   def evolve(population, problem, generation, opts \\ []) do
     population = evaluate(population, &problem.fitness_function/1, opts)
 
+    statistics_enabled? = Keyword.get(opts, :statistics_enabled?, true)
+
+    if statistics_enabled? do
+      statistics(population, generation, opts)
+    end
+
     best = hd(population)
 
     IO.puts(
-      "\rCurrent Best: #{inspect({best.fitness, best.genes, best.age, length(population)})}"
+      "\rCurrent Best: #{inspect({best.fitness, best.genes, generation, length(population)})}"
     )
 
     if problem.terminate?(population, generation) do
@@ -21,15 +27,32 @@ defmodule Genetic do
       {paired_parents, parents, leftover} = select(population, opts)
       children = crossover(paired_parents, opts)
       mutants = mutation(population, opts)
-      offspring = Enum.drop(children, Enum.count(mutants)) ++ mutants
+
+      offspring = children ++ mutants
       new_population = reinsertion(parents, offspring, leftover, opts)
+
+      # if there is a mutant kill a child
+      # offspring = Enum.drop(children, Enum.count(mutants)) ++ mutants
+      # new_population = reinsertion(parents, offspring, leftover, opts)
+
+      # if there is a mutant kill a leftover
+      # offspring = children ++ mutants
+      # new_population = reinsertion(parents, offspring, Enum.drop(leftover, Enum.count(mutants)), opts)
+
       evolve(new_population, problem, generation + 1, opts)
     end
   end
 
   def initialize(genotype, opts \\ []) do
     population_size = Keyword.get(opts, :population_size, 100)
-    for(_ <- 1..population_size, do: genotype.())
+    genealogy_enabled? = Keyword.get(opts, :genealogy_enabled?, true)
+    population = for(_ <- 1..population_size, do: genotype.())
+
+    if genealogy_enabled? do
+      Utilities.Genealogy.add_chromosomes(population)
+    end
+
+    population
   end
 
   def evaluate(population, fitness_function, _opts \\ []) do
@@ -71,9 +94,17 @@ defmodule Genetic do
     crossover_rate = Keyword.get(opts, :crossover_rate, 0.5)
     chromosome_repair = Keyword.get(opts, :chromosome_repair, false)
 
+    genealogy_enabled? = Keyword.get(opts, :genealogy_enabled?, true)
+
     new_generation =
       Enum.reduce(population, [], fn {p1, p2}, acc ->
         {c1, c2} = apply(crossover_fn, [p1, p2, crossover_rate])
+
+        if genealogy_enabled? do
+          Utilities.Genealogy.add_chromosome(p1, p2, c1)
+          Utilities.Genealogy.add_chromosome(p1, p2, c2)
+        end
+
         [c1, c2 | acc]
       end)
 
@@ -92,15 +123,16 @@ defmodule Genetic do
     population
     |> Enum.take_random(n)
     |> Enum.map(fn chromosome ->
-      new_chromosome = apply(mutation_fn, [chromosome, mutation_args])
-      %Chromosome{chromosome | genes: new_chromosome.genes}
+      mutant = apply(mutation_fn, [chromosome, mutation_args])
+      Utilities.Genealogy.add_chromosome(chromosome, mutant)
+      mutant
     end)
   end
 
   def reinsertion(parents, offspring, leftover, opts \\ []) do
-    strategy = Keyword.get(opts, :reinsertion_strategy, &Toolbox.Reinsertion.pure/4)
+    strategy = Keyword.get(opts, :reinsertion_strategy, &Toolbox.Reinsertion.pure/5)
     survival_rate = Keyword.get(opts, :survival_rate, 0.2)
-    apply(strategy, [parents, offspring, leftover, survival_rate])
+    apply(strategy, [parents, offspring, leftover, survival_rate, opts])
   end
 
   defp repair_chromosome(chromosomes) do
@@ -119,5 +151,26 @@ defmodule Genetic do
       num = :rand.uniform(8) - 1
       repair_helper(MapSet.put(chromosome, num), k)
     end
+  end
+
+  def statistics(population, generation, opts \\ []) do
+    default_stats = [
+      min_fitness: &Enum.min_by(&1, fn c -> c.fitness end).fitness,
+      max_fitness: &Enum.max_by(&1, fn c -> c.fitness end).fitness,
+      mean_fitness: &(Enum.sum(Enum.map(&1, fn c -> c.fitness end)) / length(population))
+    ]
+
+    stats = Keyword.get(opts, :statistics, default_stats)
+
+    stats_map =
+      stats
+      |> Enum.reduce(
+        %{},
+        fn {key, func}, acc ->
+          Map.put(acc, key, func.(population))
+        end
+      )
+
+    Utilities.Statistics.insert(generation, stats_map)
   end
 end

@@ -24,7 +24,7 @@ defmodule Toolbox.Crossover do
     # Make and return
     {c1, c2} = {head1 ++ slice1 ++ tail1, head2 ++ slice2 ++ tail2}
 
-    {%Chromosome{p1 | genes: c1, size: p1.size}, %Chromosome{p2 | genes: c2, size: p2.size}}
+    {Chromosome.new(genes: c1, size: p1.size), Chromosome.new(genes: c2, size: p2.size)}
   end
 
   def uniform(p1, p2, rate) do
@@ -40,7 +40,7 @@ defmodule Toolbox.Crossover do
       end)
       |> Enum.unzip()
 
-    {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
+    {Chromosome.new(genes: c1, size: length(c1)), Chromosome.new(genes: c2, size: length(c2))}
   end
 
   def single_point(p1, p2, _rate) do
@@ -48,7 +48,7 @@ defmodule Toolbox.Crossover do
     {p1_head, p1_tail} = Enum.split(p1.genes, cx_point)
     {p2_head, p2_tail} = Enum.split(p2.genes, cx_point)
     {c1, c2} = {p1_head ++ p2_tail, p2_head ++ p1_tail}
-    {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
+    {Chromosome.new(genes: c1, size: length(c1)), Chromosome.new(genes: c2, size: length(c2))}
   end
 
   def whole_arithmetic_crossover(p1, p2, rate) do
@@ -63,7 +63,7 @@ defmodule Toolbox.Crossover do
       end)
       |> Enum.unzip()
 
-    {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
+    {Chromosome.new(genes: c1, size: length(c1)), Chromosome.new(genes: c2, size: length(c2))}
   end
 
   def random_rate_whole_arithmetic_crossover(p1, p2, _rate) do
@@ -80,6 +80,6 @@ defmodule Toolbox.Crossover do
       end)
       |> Enum.unzip()
 
-    {%Chromosome{p1 | genes: c1, size: length(c1)}, %Chromosome{p2 | genes: c2, size: length(c2)}}
+    {Chromosome.new(genes: c1, size: length(c1)), Chromosome.new(genes: c2, size: length(c2))}
   end
 end

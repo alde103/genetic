@@ -14,7 +14,7 @@ defmodule Toolbox.Mutation do
         end
       end)
 
-    %Chromosome{chromosome | genes: new_genes, size: chromosome.size}
+    Chromosome.new(genes: new_genes, size: chromosome.size)
   end
 
   # For binary, permutation, and some real-value genotypes.
@@ -23,7 +23,7 @@ defmodule Toolbox.Mutation do
       chromosome.genes
       |> Enum.shuffle()
 
-    %Chromosome{chromosome | genes: new_genes, size: chromosome.size}
+    Chromosome.new(genes: new_genes, size: chromosome.size)
   end
 
   def scramble_by_slice(chromosome, n) do
@@ -40,7 +40,7 @@ defmodule Toolbox.Mutation do
     mid = Enum.slice(chromosome.genes, lo, hi)
     tail = Enum.slice(chromosome.genes, hi, chromosome.size)
 
-    %Chromosome{chromosome | genes: head ++ Enum.shuffle(mid) ++ tail, size: chromosome.size}
+    Chromosome.new(genes: head ++ Enum.shuffle(mid) ++ tail, size: chromosome.size)
   end
 
   def gaussian(chromosome, _arg) do
@@ -58,6 +58,6 @@ defmodule Toolbox.Mutation do
         :rand.normal(mu, sigma)
       end)
 
-    %Chromosome{chromosome | genes: new_genes, size: chromosome.size}
+    Chromosome.new(genes: new_genes, size: chromosome.size)
   end
 end

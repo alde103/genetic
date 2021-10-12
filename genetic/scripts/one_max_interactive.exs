@@ -5,7 +5,7 @@ defmodule OneMaxInteractive do
   @impl true
   def genotype() do
     genes = for _ <- 1..42, do: Enum.random(0..1)
-    %Chromosome{genes: genes, size: 42}
+    Chromosome.new(genes: genes, size: 42)
   end
 
   @impl true

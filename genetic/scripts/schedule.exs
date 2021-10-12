@@ -5,7 +5,7 @@ defmodule Schedule do
   @impl true
   def genotype do
     genes = for _ <- 1..10, do: Enum.random(0..1)
-    %Chromosome{genes: genes, size: 10}
+    Chromosome.new(genes: genes, size: 10)
   end
 
   @impl true
@@ -39,6 +39,6 @@ defmodule Schedule do
 end
 
 #soln = Genetic.run(Schedule, population_size: 100)
-soln = Genetic.run(Schedule, population_size: 100, reinsertion_strategy: &Toolbox.Reinsertion.elitist/4)
+soln = Genetic.run(Schedule, population_size: 100, reinsertion_strategy: &Toolbox.Reinsertion.elitist/5)
 #soln = Genetic.run(Schedule, population_size: 100, reinsertion_strategy: &Toolbox.Reinsertion.uniform/4)
 IO.inspect(soln)

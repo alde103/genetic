@@ -3,7 +3,7 @@ defmodule NQueens do
   alias Types.Chromosome
 
   @impl true
-  def genotype, do: %Chromosome{genes: Enum.shuffle(0..7), size: 8}
+  def genotype, do: Chromosome.new(genes: Enum.shuffle(0..7), size: 8)
 
   @impl true
   def fitness_function(chromosome) do

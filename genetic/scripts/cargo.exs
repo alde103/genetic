@@ -5,7 +5,7 @@ defmodule Cargo do
   @impl true
   def genotype() do
     genes = for _ <- 1..10, do: Enum.random(0..1)
-    %Chromosome{genes: genes, size: 10}
+    Chromosome.new(genes: genes, size: 10)
   end
 
   @impl true
@@ -31,11 +31,11 @@ defmodule Cargo do
 
   @impl true
   def terminate?(_population, generation) do
-    generation == 2000
+    generation == 1000
   end
 end
 
-soln = Genetic.run(Cargo, population_size: 50, mutation_rate: 0.05)
+soln = Genetic.run(Cargo, population_size: 25, mutation_rate: 0.05)
 
 IO.inspect(soln)
 
