@@ -25,3 +25,5 @@ genetic-*.tar
 
 # Temporary files for e.g. tests
 /tmp
+
+libale_c.so
