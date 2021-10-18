@@ -24,7 +24,9 @@ defmodule Genetic.MixProject do
     [
       {:libgraph, "~> 0.13"},
       {:gnuplot, "~> 1.19"},
-      {:alex, "~> 0.3.2"}
+      {:alex, "~> 0.3.2"},
+      {:benchee, "~> 1.0.1"},
+      {:exprof, "~> 0.2.0"}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
     ]
