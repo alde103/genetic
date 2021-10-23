@@ -44,20 +44,23 @@ defmodule Toolbox.Selection do
       |> Enum.sum()
 
     0..(n - 1)
-    |> Enum.map(fn _n ->
+    |> Enum.map(fn _ ->
       u = :rand.uniform() * sum_fitness
-
-      chromosomes
-      |> Enum.reduce_while(
-        0,
-        fn x, sum ->
-          if x.fitness + sum > u do
-            {:halt, x}
-          else
-            {:cont, x.fitness + sum}
-          end
-        end
-      )
+      spin(chromosomes, u)
     end)
+  end
+
+  defp spin(chromosomes, u) do
+    chromosomes
+    |> Enum.reduce_while(
+      0,
+      fn x, sum ->
+        if x.fitness + sum > u do
+          {:halt, x}
+        else
+          {:cont, x.fitness + sum}
+        end
+      end
+    )
   end
 end
