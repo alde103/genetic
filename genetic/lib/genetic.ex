@@ -55,15 +55,29 @@ defmodule Genetic do
     population
   end
 
-  def evaluate(population, fitness_function, _opts \\ []) do
+  def evaluate(population, fitness_function, opts \\ []) do
+    parallelism_enabled? = Keyword.get(opts, :parallelism_enabled?, false)
     population
-    |> Enum.map(fn chromosome ->
-      fitness = fitness_function.(chromosome)
-      age = chromosome.age + 1
-      %Chromosome{chromosome | fitness: fitness, age: age}
-    end)
+    |> pmap(fitness_function, parallelism_enabled?)
     |> Enum.sort_by(& &1.fitness, &>=/2)
   end
+
+  defp pmap(population, fitness_function, false) do
+    Enum.map(population, fn chromosome -> compute_fitness(chromosome, fitness_function) end)
+  end
+
+  defp pmap(population, fitness_function,  true) do
+    population
+    |> Enum.map(fn chromosome -> Task.async(__MODULE__, :compute_fitness, [chromosome, fitness_function]) end)
+    |> Enum.map(&Task.await(&1))
+  end
+
+  def compute_fitness(chromosome, fitness_function) do
+    fitness = fitness_function.(chromosome)
+    age = chromosome.age + 1
+    %Chromosome{chromosome | fitness: fitness, age: age}
+  end
+
 
   def select(population, opts \\ []) do
     select_fn = Keyword.get(opts, :selection_type, &Toolbox.Selection.elite/3)

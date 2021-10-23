@@ -1,6 +1,5 @@
 defmodule Toolbox.Mutation do
   alias Types.Chromosome
-  use Bitwise
 
   # For binary genotypes
   def flip(chromosome, probability) do
@@ -8,7 +7,7 @@ defmodule Toolbox.Mutation do
       chromosome.genes
       |> Enum.map(fn g ->
         if :rand.uniform() < probability do
-          g ^^^ 1
+          Bitwise.bxor(g, 1)
         else
           g
         end

@@ -15,6 +15,6 @@ defmodule OneMax do
   def terminate?([best | _tail], _generation), do: best.fitness == 42
 end
 
-soln = Genetic.run(OneMax)
+soln = Genetic.run(OneMax, parallelism_enabled?: true)
 
 IO.inspect(soln)
